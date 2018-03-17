@@ -1,6 +1,6 @@
 {
   "name": "test-script-runner",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "It helps to connect selenium with javascript modules. You can define functions to run and bind it to buttons, or other HTML elements or events",
   "main": "index.js",
   "scripts": {
