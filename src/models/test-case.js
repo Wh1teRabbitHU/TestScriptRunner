@@ -1,5 +1,8 @@
 'use strict';
 
+const OutOfBoundException   = require('../exceptions/out-of-bound');
+const StepNotFoundException = require('../exceptions/step-not-found');
+
 const FIRST_STEP_ID = 1;
 
 class TestCase {
@@ -45,9 +48,7 @@ class TestCase {
 
 	runStep(stepId) {
 		if (stepId > this.stepCounter || stepId < FIRST_STEP_ID) {
-			console.log('The given ID is not valid, its out of bound: ' + stepId);
-
-			return null;
+			throw new OutOfBoundException('The given ID is not valid, its out of bound: ' + stepId);
 		}
 
 		this.currentStepNumber = stepId;
@@ -62,9 +63,7 @@ class TestCase {
 			});
 
 		if (typeof currentStep == 'undefined') {
-			console.log('Cannot be found step with the following ID: ' + self.currentStepNumber);
-
-			return null;
+			throw new StepNotFoundException('Step not found with the following ID: ' + self.currentStepNumber);
 		}
 
 		return currentStep.run();

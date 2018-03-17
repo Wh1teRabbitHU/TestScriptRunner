@@ -1,8 +1,10 @@
 'use strict';
 
-var assert         = require('assert'),
-	mocha          = require('mocha'),
-	testCaseRunner = require('../../index');
+var assert                = require('assert'),
+	mocha                 = require('mocha'),
+	testCaseRunner        = require('../../index'),
+	OutOfBoundException   = require('../../src/exceptions/out-of-bound'),
+	StepNotFoundException = require('../../src/exceptions/step-not-found');
 
 var describe = mocha.describe,
 	it       = mocha.it;
@@ -71,5 +73,11 @@ describe('Checking test runs', function() {
 
 		assert.equal(testCase.runStep(4), testFn4ReturnValue);
 		assert.equal(testCase.currentStepNumber, testStep4.stepNumber);
+
+		assert.throws(function() { testCase.runStep(99); }, OutOfBoundException);
+
+		testCase.currentStepNumber = 99;
+
+		assert.throws(function() { testCase.runCurrentStep(); }, StepNotFoundException);
 	});
 });
