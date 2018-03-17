@@ -7,9 +7,9 @@ class TestCase {
 	constructor({ name, description }) {
 		this.name = name;
 		this.description = description;
-		this.steps = [];
+		this.testSteps = [];
 		this.stepCounter = 0;
-		this.currentStepId = FIRST_STEP_ID - 1;
+		this.currentStepNumber = FIRST_STEP_ID;
 	}
 
 	setTestRunner(testRunner) {
@@ -18,53 +18,56 @@ class TestCase {
 	}
 
 	addTestStep(testStep) {
-		this.steps.push(testStep);
+		this.testSteps.push(testStep);
 
 		testStep.setTestCase(this);
 	}
 
 	runPrevStep() {
-		if (this.currentStepId <= FIRST_STEP_ID) {
-			return;
+		if (this.currentStepNumber <= FIRST_STEP_ID) {
+			return null;
 		}
 
-		this.currentStepId--;
-		this.runCurrentStep();
+		this.currentStepNumber--;
+
+		return this.runCurrentStep();
 	}
 
 	runNextStep() {
-		if (this.currentStepId >= this.stepCounter) {
-			return;
+		if (this.currentStepNumber >= this.stepCounter) {
+			return null;
 		}
 
-		this.currentStepId++;
-		this.runCurrentStep();
+		this.currentStepNumber++;
+
+		return this.runCurrentStep();
 	}
 
 	runStep(stepId) {
 		if (stepId > this.stepCounter || stepId < FIRST_STEP_ID) {
 			console.log('The given ID is not valid, its out of bound: ' + stepId);
 
-			return;
+			return null;
 		}
 
-		this.currentStepId = stepId;
-		this.runCurrentStep();
+		this.currentStepNumber = stepId;
+
+		return this.runCurrentStep();
 	}
 
 	runCurrentStep() {
 		let self = this,
-			currentStep = self.steps.find((step) => {
-				return step.stepNumber === self.currentStepId;
+			currentStep = self.testSteps.find((step) => {
+				return step.stepNumber === self.currentStepNumber;
 			});
 
 		if (typeof currentStep == 'undefined') {
-			console.log('Cannot be found step with the following ID: ' + self.currentStepId);
+			console.log('Cannot be found step with the following ID: ' + self.currentStepNumber);
 
-			return;
+			return null;
 		}
 
-		currentStep.run();
+		return currentStep.run();
 	}
 
 }

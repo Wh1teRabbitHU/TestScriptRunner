@@ -7,7 +7,7 @@ class TestRunner {
 		this.caseCounter = 0;
 	}
 
-	addCase(testCase) {
+	addTestCase(testCase) {
 		this.testCases.push(testCase);
 
 		testCase.setTestRunner(this);

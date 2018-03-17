@@ -15,10 +15,10 @@ class TestStep {
 
 	run() {
 		if (typeof this.fn == 'undefined') {
-			return;
+			return null;
 		}
 
-		this.fn();
+		return this.fn();
 	}
 
 }
