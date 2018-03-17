@@ -26,9 +26,20 @@ class TestCase {
 		testStep.setTestCase(this);
 	}
 
+	hasPrevStep() {
+		return this.currentStepNumber > FIRST_STEP_ID;
+	}
+
+	hasNextStep() {
+		return this.currentStepNumber < this.stepCounter;
+	}
+
 	runPrevStep() {
 		if (this.currentStepNumber <= FIRST_STEP_ID) {
-			return null;
+			throw new OutOfBoundException('Cannot run the previous step, because the current one is the first one!', {
+				caseNumber: this.caseNumber,
+				currentStepNumber: this.currentStepNumber
+			});
 		}
 
 		this.currentStepNumber--;
@@ -38,7 +49,10 @@ class TestCase {
 
 	runNextStep() {
 		if (this.currentStepNumber >= this.stepCounter) {
-			return null;
+			throw new OutOfBoundException('Cannot run the next step, because the current one is the last one!', {
+				caseNumber: this.caseNumber,
+				currentStepNumber: this.currentStepNumber
+			});
 		}
 
 		this.currentStepNumber++;
@@ -48,7 +62,10 @@ class TestCase {
 
 	runStep(stepId) {
 		if (stepId > this.stepCounter || stepId < FIRST_STEP_ID) {
-			throw new OutOfBoundException('The given ID is not valid, its out of bound: ' + stepId);
+			throw new OutOfBoundException('The given ID is not valid, its out of bound: ' + stepId, {
+				caseNumber: this.caseNumber,
+				currentStepNumber: this.currentStepNumber
+			});
 		}
 
 		this.currentStepNumber = stepId;
@@ -63,7 +80,10 @@ class TestCase {
 			});
 
 		if (typeof currentStep == 'undefined') {
-			throw new StepNotFoundException('Step not found with the following ID: ' + self.currentStepNumber);
+			throw new StepNotFoundException('Step not found with the following ID: ' + self.currentStepNumber, {
+				caseNumber: this.caseNumber,
+				currentStepNumber: this.currentStepNumber
+			});
 		}
 
 		return currentStep.run();
