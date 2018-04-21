@@ -55,6 +55,51 @@ class TestStep {
 		return testResult;
 	}
 
+	runAsync() {
+		let self = this;
+
+		if (typeof self.fn == 'undefined' || self.fn === null) {
+			throw new FunctionNotFoundException('No test function provided to this step function!', {
+				caseNumber: self.parentCase.caseNumber,
+				stepNumber: self.stepNumber
+			});
+		}
+
+		self.runNumber++;
+
+		return new Promise(function(resolve, reject) {
+			try {
+				resolve(self.fn());
+			} catch (error) {
+				reject(error);
+			}
+		}).then((returnValue) => {
+			let testResult = new TestResult({
+				success: true,
+				error: null,
+				returnValue: returnValue,
+				testStep: self,
+				runNumber: self.runNumber
+			});
+
+			self.lastResult = testResult;
+
+			return testResult;
+		}).catch((error) => {
+			let testResult = new TestResult({
+				success: false,
+				error: error,
+				returnValue: null,
+				testStep: self,
+				runNumber: self.runNumber
+			});
+
+			self.lastResult = testResult;
+
+			throw testResult;
+		});
+	}
+
 	reset() {
 		this.runNumber = 0;
 		this.lastResult = null;

@@ -34,7 +34,7 @@ class TestCase {
 		return this.currentStepNumber < this.stepCounter;
 	}
 
-	runPrevStep() {
+	runPrevStep(async = false) {
 		if (this.currentStepNumber <= FIRST_STEP_ID) {
 			throw new OutOfBoundException('Cannot run the previous step, because the current one is the first one!', {
 				caseNumber: this.caseNumber,
@@ -44,10 +44,10 @@ class TestCase {
 
 		this.currentStepNumber--;
 
-		return this.runCurrentStep();
+		return this.runCurrentStep(async);
 	}
 
-	runNextStep() {
+	runNextStep(async = false) {
 		if (this.currentStepNumber >= this.stepCounter) {
 			throw new OutOfBoundException('Cannot run the next step, because the current one is the last one!', {
 				caseNumber: this.caseNumber,
@@ -57,10 +57,10 @@ class TestCase {
 
 		this.currentStepNumber++;
 
-		return this.runCurrentStep();
+		return this.runCurrentStep(async);
 	}
 
-	runStep(stepId) {
+	runStep(stepId, async = false) {
 		if (stepId > this.stepCounter || stepId < FIRST_STEP_ID) {
 			throw new OutOfBoundException('The given ID is not valid, its out of bound: ' + stepId, {
 				caseNumber: this.caseNumber,
@@ -70,10 +70,10 @@ class TestCase {
 
 		this.currentStepNumber = stepId;
 
-		return this.runCurrentStep();
+		return this.runCurrentStep(async);
 	}
 
-	runCurrentStep() {
+	runCurrentStep(async = false) {
 		let self = this,
 			currentStep = self.testSteps.find((step) => {
 				return step.stepNumber === self.currentStepNumber;
@@ -86,7 +86,7 @@ class TestCase {
 			});
 		}
 
-		return currentStep.run();
+		return async ? currentStep.runAsync() : currentStep.run();
 	}
 
 }
