@@ -13,15 +13,15 @@ class TestStep {
 		this.lastResult = null;
 	}
 
-	setTestCase(parentCase) {
-		this.parentCase = parentCase;
-		this.stepNumber = ++parentCase.stepCounter;
+	setTestCase(testCase) {
+		this.testCase = testCase;
+		this.stepNumber = ++testCase.stepCounter;
 	}
 
 	run() {
 		if (typeof this.fn == 'undefined' || this.fn === null) {
 			throw new FunctionNotFoundException('No test function provided to this step function!', {
-				caseNumber: this.parentCase.caseNumber,
+				caseNumber: this.testCase.caseNumber,
 				stepNumber: this.stepNumber
 			});
 		}
@@ -60,7 +60,7 @@ class TestStep {
 
 		if (typeof self.fn == 'undefined' || self.fn === null) {
 			throw new FunctionNotFoundException('No test function provided to this step function!', {
-				caseNumber: self.parentCase.caseNumber,
+				caseNumber: self.testCase.caseNumber,
 				stepNumber: self.stepNumber
 			});
 		}
