@@ -90,7 +90,7 @@ class TestCase {
 		return this.currentStepNumber < this.stepCounter;
 	}
 
-	runPrevStep() {
+	runPrevStep(async = false) {
 		if (this.currentStepNumber <= FIRST_STEP_ID) {
 			throw new OutOfBoundException('Cannot run the previous step, because the current one is the first one!', {
 				caseNumber: this.caseNumber,
@@ -100,10 +100,10 @@ class TestCase {
 
 		this.currentStepNumber--;
 
-		return this.runCurrentStep();
+		return this.runCurrentStep(async);
 	}
 
-	runNextStep() {
+	runNextStep(async = false) {
 		if (this.currentStepNumber >= this.stepCounter) {
 			throw new OutOfBoundException('Cannot run the next step, because the current one is the last one!', {
 				caseNumber: this.caseNumber,
@@ -113,10 +113,10 @@ class TestCase {
 
 		this.currentStepNumber++;
 
-		return this.runCurrentStep();
+		return this.runCurrentStep(async);
 	}
 
-	runStep(stepId) {
+	runStep(stepId, async = false) {
 		if (stepId > this.stepCounter || stepId < FIRST_STEP_ID) {
 			throw new OutOfBoundException('The given ID is not valid, its out of bound: ' + stepId, {
 				caseNumber: this.caseNumber,
@@ -126,10 +126,10 @@ class TestCase {
 
 		this.currentStepNumber = stepId;
 
-		return this.runCurrentStep();
+		return this.runCurrentStep(async);
 	}
 
-	runCurrentStep() {
+	runCurrentStep(async = false) {
 		let self = this,
 			currentStep = self.testSteps.find((step) => {
 				return step.stepNumber === self.currentStepNumber;
@@ -142,7 +142,7 @@ class TestCase {
 			});
 		}
 
-		return currentStep.run();
+		return async ? currentStep.runAsync() : currentStep.run();
 	}
 
 }
@@ -198,15 +198,15 @@ class TestStep {
 		this.lastResult = null;
 	}
 
-	setTestCase(parentCase) {
-		this.parentCase = parentCase;
-		this.stepNumber = ++parentCase.stepCounter;
+	setTestCase(testCase) {
+		this.testCase = testCase;
+		this.stepNumber = ++testCase.stepCounter;
 	}
 
 	run() {
 		if (typeof this.fn == 'undefined' || this.fn === null) {
 			throw new FunctionNotFoundException('No test function provided to this step function!', {
-				caseNumber: this.parentCase.caseNumber,
+				caseNumber: this.testCase.caseNumber,
 				stepNumber: this.stepNumber
 			});
 		}
@@ -238,6 +238,51 @@ class TestStep {
 		this.lastResult = testResult;
 
 		return testResult;
+	}
+
+	runAsync() {
+		let self = this;
+
+		if (typeof self.fn == 'undefined' || self.fn === null) {
+			throw new FunctionNotFoundException('No test function provided to this step function!', {
+				caseNumber: self.testCase.caseNumber,
+				stepNumber: self.stepNumber
+			});
+		}
+
+		self.runNumber++;
+
+		return new Promise(function(resolve, reject) {
+			try {
+				resolve(self.fn());
+			} catch (error) {
+				reject(error);
+			}
+		}).then((returnValue) => {
+			let testResult = new TestResult({
+				success: true,
+				error: null,
+				returnValue: returnValue,
+				testStep: self,
+				runNumber: self.runNumber
+			});
+
+			self.lastResult = testResult;
+
+			return testResult;
+		}).catch((error) => {
+			let testResult = new TestResult({
+				success: false,
+				error: error,
+				returnValue: null,
+				testStep: self,
+				runNumber: self.runNumber
+			});
+
+			self.lastResult = testResult;
+
+			throw testResult;
+		});
 	}
 
 	reset() {
