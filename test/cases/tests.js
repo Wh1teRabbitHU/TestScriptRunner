@@ -96,6 +96,22 @@ describe('Checking test runs', function() {
 		assert.equal(testStep2.lastResult, null);
 	});
 
+	it('run a "TestStep" test async multiple times and reset all the previous runs statistics', function(done) {
+		Promise.all([ testStep2.runAsync(), testStep2.runAsync(), testStep2.runAsync() ])
+			.then(function() {
+				assert.notEqual(testStep2.runNumber, 0);
+				assert.notEqual(testStep2.lastResult, null);
+
+				testStep2.reset();
+
+				assert.equal(testStep2.runNumber, 0);
+				assert.equal(testStep2.lastResult, null);
+
+				done();
+			})
+			.catch(done);
+	});
+
 	it('run a "TestStep" test function with error and check the returned "TestResult" object', function() {
 		let testResult = testStepError.run();
 
@@ -105,6 +121,21 @@ describe('Checking test runs', function() {
 		assert.notEqual(testResult.returnValue, testFnErrorReturnValue);
 		assert.equal(testResult.returnValue, null);
 		assert.deepEqual(testResult.testStep, testStepError);
+	});
+
+	it('run a "TestStep" test async function with error and check the returned "TestResult" object', function(done) {
+		testStepError.runAsync()
+			.catch(function(testResult) {
+				assert.notEqual(testResult, null);
+				assert.equal(testResult.success, false);
+				assert.notEqual(testResult.error, null);
+				assert.notEqual(testResult.returnValue, testFnErrorReturnValue);
+				assert.equal(testResult.returnValue, null);
+				assert.deepEqual(testResult.testStep, testStepError);
+
+				done();
+			})
+			.catch(done);
 	});
 
 	it('run the "TestCase"\'s "TestStep"\'s and returns with a valid returnValue', function() {
@@ -125,6 +156,38 @@ describe('Checking test runs', function() {
 
 		assert.equal(testCase.runStep(3).returnValue, testFn3ReturnValue);
 		assert.equal(testCase.currentStepNumber, testStep3.stepNumber);
+	});
+
+	it('run the "TestCase"\'s "TestStep"\'s async and returns with a valid returnValue', function(done) {
+		testCase.currentStepNumber = 1;
+
+		Promise.resolve()
+			.then(function() { return testCase.runCurrentStep(true); })
+			.then(function(result) {
+				assert.equal(result.returnValue, testFn1ReturnValue);
+			})
+			.then(function() { return testCase.runNextStep(true); })
+			.then(function(result) {
+				assert.equal(result.returnValue, testFn2ReturnValue);
+			})
+			.then(function() { return testCase.runNextStep(true); })
+			.then(function(result) {
+				assert.equal(result.returnValue, testFn3ReturnValue);
+			})
+			.then(function() { return testCase.runPrevStep(true); })
+			.then(function(result) {
+				assert.equal(result.returnValue, testFn2ReturnValue);
+			})
+			.then(function() { return testCase.runPrevStep(true); })
+			.then(function(result) {
+				assert.equal(result.returnValue, testFn1ReturnValue);
+			})
+			.then(function() { return testCase.runStep(3, true); })
+			.then(function(result) {
+				assert.equal(result.returnValue, testFn3ReturnValue);
+			})
+			.then(done)
+			.catch(done);
 	});
 
 	it('check a "TestCase"\'s hasNextStep and hasPrevStep functions', function() {
