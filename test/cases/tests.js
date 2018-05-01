@@ -154,12 +154,12 @@ describe('Checking test runs', function() {
 		assert.equal(testCase.runPrevStep().returnValue, testFn1ReturnValue);
 		assert.equal(testCase.currentStepNumber, testStep1.stepNumber);
 
-		assert.equal(testCase.runStep(3).returnValue, testFn3ReturnValue);
+		assert.equal(testCase.runStep(2).returnValue, testFn3ReturnValue);
 		assert.equal(testCase.currentStepNumber, testStep3.stepNumber);
 	});
 
 	it('run the "TestCase"\'s "TestStep"\'s async and returns with a valid returnValue', function(done) {
-		testCase.currentStepNumber = 1;
+		testCase.currentStepNumber = 0;
 
 		Promise.resolve()
 			.then(function() { return testCase.runCurrentStep(true); })
@@ -182,7 +182,7 @@ describe('Checking test runs', function() {
 			.then(function(result) {
 				assert.equal(result.returnValue, testFn1ReturnValue);
 			})
-			.then(function() { return testCase.runStep(3, true); })
+			.then(function() { return testCase.runStep(2, true); })
 			.then(function(result) {
 				assert.equal(result.returnValue, testFn3ReturnValue);
 			})
@@ -193,7 +193,7 @@ describe('Checking test runs', function() {
 	it('check a "TestCase"\'s hasNextStep and hasPrevStep functions', function() {
 		let currentStepNumber = testCase.currentStepNumber;
 
-		testCase.currentStepNumber = 1;
+		testCase.currentStepNumber = 0;
 
 		assert.equal(testCase.hasNextStep(), true);
 		assert.equal(testCase.hasPrevStep(), false);
@@ -213,22 +213,22 @@ describe('Checking test runs', function() {
 
 	it('check for "stepNumber" errors, OutOfBoundExceptions, FunctionNotFoundException and StepNotFoundException', function() {
 		assert.throws(function() {
-			testCase.currentStepNumber = testCase.testSteps.length;
-			testCase.runNextStep();
-		}, OutOfBoundException);
-
-		assert.doesNotThrow(function() {
 			testCase.currentStepNumber = testCase.testSteps.length - 1;
 			testCase.runNextStep();
 		}, OutOfBoundException);
 
+		assert.doesNotThrow(function() {
+			testCase.currentStepNumber = testCase.testSteps.length - 2;
+			testCase.runNextStep();
+		}, OutOfBoundException);
+
 		assert.throws(function() {
-			testCase.currentStepNumber = 1;
+			testCase.currentStepNumber = 0;
 			testCase.runPrevStep();
 		}, OutOfBoundException);
 
 		assert.doesNotThrow(function() {
-			testCase.currentStepNumber = 2;
+			testCase.currentStepNumber = 1;
 			testCase.runPrevStep();
 		}, OutOfBoundException);
 
@@ -237,7 +237,7 @@ describe('Checking test runs', function() {
 		}, OutOfBoundException);
 
 		assert.doesNotThrow(function() {
-			testCase.runStep(testCase.testSteps.length);
+			testCase.runStep(testCase.testSteps.length - 1);
 		}, OutOfBoundException);
 
 		assert.throws(function() {
@@ -246,7 +246,7 @@ describe('Checking test runs', function() {
 		}, StepNotFoundException);
 
 		assert.doesNotThrow(function() {
-			testCase.currentStepNumber = testCase.testSteps.length;
+			testCase.currentStepNumber = testCase.testSteps.length - 1;
 			testCase.runCurrentStep();
 		}, StepNotFoundException);
 
