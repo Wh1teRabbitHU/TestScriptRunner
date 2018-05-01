@@ -59,21 +59,30 @@ module.exports = StepNotFound;
 const OutOfBoundException   = require('../exceptions/out-of-bound');
 const StepNotFoundException = require('../exceptions/step-not-found');
 
-const FIRST_STEP_ID = 1;
-
 class TestCase {
 
 	constructor({ name, description }) {
 		this.name = name;
 		this.description = description;
 		this.testSteps = [];
-		this.stepCounter = 0;
-		this.currentStepNumber = FIRST_STEP_ID;
+		this.currentStepNumber = 0;
+	}
+
+	get stepCounter() {
+		return this.testSteps.length;
+	}
+
+	get currentStep() {
+		var self = this;
+
+		return self.testSteps.find((step) => {
+			return step.stepNumber === self.currentStepNumber;
+		});
 	}
 
 	setTestRunner(testRunner) {
 		this.testRunner = testRunner;
-		this.caseNumber = ++testRunner.caseCounter;
+		this.caseNumber = testRunner.caseCounter - 1;
 	}
 
 	addTestStep(testStep) {
@@ -83,7 +92,7 @@ class TestCase {
 	}
 
 	hasPrevStep() {
-		return this.currentStepNumber > FIRST_STEP_ID;
+		return this.currentStepNumber > 0;
 	}
 
 	hasNextStep() {
@@ -91,7 +100,7 @@ class TestCase {
 	}
 
 	runPrevStep(async = false) {
-		if (this.currentStepNumber <= FIRST_STEP_ID) {
+		if (this.currentStepNumber <= 0) {
 			throw new OutOfBoundException('Cannot run the previous step, because the current one is the first one!', {
 				caseNumber: this.caseNumber,
 				currentStepNumber: this.currentStepNumber
@@ -104,7 +113,7 @@ class TestCase {
 	}
 
 	runNextStep(async = false) {
-		if (this.currentStepNumber >= this.stepCounter) {
+		if (this.currentStepNumber + 1 >= this.stepCounter) {
 			throw new OutOfBoundException('Cannot run the next step, because the current one is the last one!', {
 				caseNumber: this.caseNumber,
 				currentStepNumber: this.currentStepNumber
@@ -117,7 +126,7 @@ class TestCase {
 	}
 
 	runStep(stepId, async = false) {
-		if (stepId > this.stepCounter || stepId < FIRST_STEP_ID) {
+		if (stepId > this.stepCounter || stepId < 0) {
 			throw new OutOfBoundException('The given ID is not valid, its out of bound: ' + stepId, {
 				caseNumber: this.caseNumber,
 				currentStepNumber: this.currentStepNumber
@@ -130,19 +139,14 @@ class TestCase {
 	}
 
 	runCurrentStep(async = false) {
-		let self = this,
-			currentStep = self.testSteps.find((step) => {
-				return step.stepNumber === self.currentStepNumber;
-			});
-
-		if (typeof currentStep == 'undefined') {
-			throw new StepNotFoundException('Step not found with the following ID: ' + self.currentStepNumber, {
+		if (typeof this.currentStep == 'undefined') {
+			throw new StepNotFoundException('Step not found with the following ID: ' + this.currentStepNumber, {
 				caseNumber: this.caseNumber,
 				currentStepNumber: this.currentStepNumber
 			});
 		}
 
-		return async ? currentStep.runAsync() : currentStep.run();
+		return async ? this.currentStep.runAsync() : this.currentStep.run();
 	}
 
 }
@@ -171,7 +175,10 @@ class TestRunner {
 
 	constructor() {
 		this.testCases = [];
-		this.caseCounter = 0;
+	}
+
+	get caseCounter() {
+		return this.testCases.length;
 	}
 
 	addTestCase(testCase) {
@@ -200,7 +207,7 @@ class TestStep {
 
 	setTestCase(testCase) {
 		this.testCase = testCase;
-		this.stepNumber = ++testCase.stepCounter;
+		this.stepNumber = testCase.stepCounter - 1;
 	}
 
 	run() {
