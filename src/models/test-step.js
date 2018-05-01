@@ -15,7 +15,7 @@ class TestStep {
 
 	setTestCase(testCase) {
 		this.testCase = testCase;
-		this.stepNumber = ++testCase.stepCounter;
+		this.stepNumber = testCase.stepCounter - 1;
 	}
 
 	run() {

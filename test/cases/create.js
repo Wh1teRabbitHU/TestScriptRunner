@@ -14,7 +14,7 @@ const testCaseName = 'Test case name';
 const testCaseDescription = 'Test case description';
 const defaultTestSteps = [];
 const defaultStepCounter = 0;
-const defaultCurrentStepNumber = 1;
+const defaultCurrentStepNumber = 0;
 
 const testStepName = 'Test step name';
 const testStepDescription = 'Test step description';

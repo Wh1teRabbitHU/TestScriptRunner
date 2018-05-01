@@ -60,7 +60,6 @@ The main test handler class. It can be added to a TestRunner instance. Every tes
 - caseNumber: The current instances unique ID. (relative to its parent TestRunner)
 - testRunner: The parent TestRunner instance
 - testSteps: All the TestSteps assigned to this instance
-- stepCounter: Its just an inner counter
 - currentStepNumber: The current index number of the test steps. When you run and step forward or backwards, this variable will follow these actions.
 
 ### TestStep
@@ -89,11 +88,13 @@ This is a model class. It contains many information about a certain test step ex
 
 ## API descriptions
 
-| Class name |  Method name   |            Arguments          |                                                                                                                                                                                            Description                                                                                                                                                                                            |
+| Class name |  Method name   |                             Arguments                              |                                                                                                                                                                                            Description                                                                                                                                                                                            |
 |------------|----------------|--------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | TestRunner | [Constructor]  | -                                                                  | The default constructor for the TestRunner class. It will initialize all the inner attributes.                                                                                                                                                                                                                                                                                                    |
 |            | addTestCase    | TestCase testCase (required)                                       | Adding a test case to the runner. It will set the parent-child connection .                                                                                                                                                                                                                                                                                                                       |
 | TestCase   | [Constructor]  | Object data (optional) { name, description }                       | The default constructor for the TestCase class. Optionaly you can provide some basic information to the instance. (name and description)                                                                                                                                                                                                                                                          |
+|            | stepCounter    | -                                                                  | Count the steps and return with it                                                                                                                                                                                                                                                                                                                                                                                                  |
+|            | currentStep    | -                                                                  | Returns the current step from the steps array                                                                                                                                                                                                                                                                                                                                                     |
 |            | setTestRunner  | TestRunner testRunner (required)                                   | It set the parent runner entity for this instance.                                                                                                                                                                                                                                                                                                                                                |
 |            | addTestStep    | TestStep testStep (required)                                       | Adding a test step to the case. It will set the parent-child connection.                                                                                                                                                                                                                                                                                                                          |
 |            | hasPrevStep    | -                                                                  | If the current step index point to the first step, then it returns false, otherwise true.                                                                                                                                                                                                                                                                                                         |
@@ -169,7 +170,7 @@ myTestCase.runCurrentStep(true) // Running the next step wrapped in a Promise ob
 	.then(console.log)
 	.catch(console.error); // catching the error with all the data
 
-myTestCase.currentStepNumber = 1; // Starting from 1, not zero
+myTestCase.currentStepNumber = 0; // Starting from 0
 
 while (myTestCase.hasNextStep()) {
 	var stepResult = myTestCase.runNextStep();
@@ -183,6 +184,7 @@ console.log(myTestStep3.lastResult); // Did you missed this step's result? Dont 
 
 ## Plans
 
+- Adding helper functions to the runner, like the ones in the TestCase (hasPrevCase, hasNextCase, selectCase, currentCase)
 - More detailed history, not just the last run's result
 - Adding TestCase level result entity (some kind of summary for all the test steps results)
 - Adding statistic to the TestRunner entity

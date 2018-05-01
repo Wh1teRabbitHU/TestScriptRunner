@@ -4,7 +4,10 @@ class TestRunner {
 
 	constructor() {
 		this.testCases = [];
-		this.caseCounter = 0;
+	}
+
+	get caseCounter() {
+		return this.testCases.length;
 	}
 
 	addTestCase(testCase) {
